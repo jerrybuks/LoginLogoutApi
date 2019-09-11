@@ -16,7 +16,7 @@ router.post(
 		check('firstName', 'First name is required')
 			.not()
             .isEmpty(),
-            check('lastName', 'Last name is required')
+        check('lastName', 'Last name is required')
 			.not()
 			.isEmpty(),
 		check('email', 'Please include a valid email').isEmail(),
@@ -50,9 +50,9 @@ router.post(
 			const salt = await bcrypt.genSalt(10);
 
 			user.password = await bcrypt.hash(password, salt);
-
+			console.log(user)
 			await user.save();
-
+			console.log(user)
 			const payload = {
 				user: {
 					id: user.id

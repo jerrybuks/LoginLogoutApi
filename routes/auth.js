@@ -1,25 +1,15 @@
 
 const express = require('express');
+var mongoose = require('mongoose')
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const auth = require('../middleware/auth');
 const jwt = require('jsonwebtoken');
 const jwtConfig = require('../config/jwtSecret');
 const { check, validationResult } = require('express-validator');
+const authorize = require('../middleware/authorize')
 
 const User = require('../models/User');
-
-
-router.get('/', auth, async (req, res) => {
-	try {
-		const user = await User.findById(req.user.id).select('-password');
-		res.json(user);
-	} catch (err) {
-		console.error(err.message);
-		res.status(500).send('Server Error');
-	}
-});
-
 
 router.post(
 	'/',
@@ -69,5 +59,19 @@ router.post(
 		}
 	}
 );
+
+router.delete('/:id',[auth, authorize], async (req, res) => {
+	try {
+		const { id }= req.params
+		if (!mongoose.Types.ObjectId.isValid(id)) return res.status(401).json({ msg: 'Id is invalid' })
+		const user = await User.findById(id);
+		if (!user) return res.status(404).json({ msg: 'User not found' });
+		await User.findByIdAndRemove(id);
+		res.json({ msg: 'User removed' });
+	} catch (err) {
+		console.error(err.message);
+		res.status(500).send('Server error');
+	}
+})
 
 module.exports = router;
